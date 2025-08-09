@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chatbot Component</title>
+    <style>
+      /* General Body Styling */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+      }
+
+      /* Chatbot Toggle Icon */
+      .chatbot-toggle {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background-color: #2ada62;
+        color: white;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+
+      .chatbot-toggle:hover {
+        transform: scale(1.1);
+      }
+
+      /* The main chatbot dialog container */
+      .chatbot-dialog {
+        position: fixed;
+        bottom: 100px;
+        right: 30px;
+        width: 350px;
+        height: 500px;
+        background-color: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+
+        /* Start hidden and transition */
+        transform: scale(0);
+        transform-origin: bottom right;
+        opacity: 0;
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+      }
+
+      /* Class to show the chatbot */
+      .chatbot-dialog.show {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      /* Chatbot Header */
+      .chatbot-header {
+        background-color: #2ada62;
+        color: white;
+        padding: 15px;
+        text-align: center;
+        font-size: 1.2em;
+        font-weight: bold;
+      }
+
+      /* Chatbot Body/Messages Area */
+      .chatbot-body {
+        flex-grow: 1;
+        padding: 15px;
+        overflow-y: auto;
+        background-color: #f9f9f9;
+      }
+
+      .chat-message {
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        border-radius: 18px;
+        max-width: 80%;
+        border: 1px solid rgb(36, 189, 64);
+        font-size:x-small;
+      }
+
+      .user-message {
+        background-color: #2ada62;
+        color: white;
+        align-self: flex-end; /*
+            This doesn't work directly on child, parent needs display:flex */
+        margin-left: auto; /*
+            This pushes it to the right */
+      }
+
+      /* Footer with Input Fields */
+      .chatbot-footer {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        background-color: #fff;
+      }
+
+      .chatbot-footer input[type="text"] {
+        flex-grow: 1;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        padding: 10px 15px;
+        font-size: 1em;
+        margin-right: 10px;
+      }
+
+      .chatbot-footer button {
+        background-color: #2ada62;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background-color 0.3s ease;
+      }
+
+      .chatbot-footer button:hover {
+        background-color: #2ada62;
+      }
+
+      .credit-footer {
+        border-top: 1px solid #ddd;
+        text-align: center;
+        font-size: xx-small;
+        padding-bottom: 1em;
+        padding-top: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Placeholder content for the page -->
+    <h1>My Awesome Website</h1>
+    <p>Scroll down to see the chatbot icon in the bottom right corner.</p>
+    <div style="height: 1200px"></div>
+    <!-- To enable scrolling -->
+
+    <!-- 1. The Chatbot Toggle Icon -->
+    <button class="chatbot-toggle" id="chatbotToggle">
+      <!-- A simple chat icon using text/emoji -->
+      💬
+    </button>
+
+    <!-- 2. The Chatbot Dialog -->
+    <div class="chatbot-dialog" id="chatbotDialog">
+      <!-- Header -->
+      <div class="chatbot-header">Chat with Support</div>
+
+      <!-- Body (where messages appear) -->
+      <div class="chatbot-body" id="chatbotBody">
+        <!-- Initial message from the bot can go here -->
+        <div class="chat-message bot-message">
+          Hello! How can I help you today?
+        </div>
+      </div>
+
+      <!-- Footer (with input fields) -->
+      <div class="chatbot-footer">
+        <input type="text" id="userInput" placeholder="Type your message..." />
+        <button id="sendMessageBtn">Send</button>
+      </div>
+      <p class="credit-footer">Developed with ❤️ by the YDTA AI/ML learners</p>
+    </div>
+
+    <script>
+      const chatbotToggle = document.getElementById("chatbotToggle");
+      const chatbotDialog = document.getElementById("chatbotDialog");
+      const chatbotBody = document.getElementById("chatbotBody");
+      const userInput = document.getElementById("userInput");
+      const sendMessageBtn = document.getElementById("sendMessageBtn");
+
+      // --- Toggle chatbot ---
+      chatbotToggle.addEventListener("click", () => {
+        chatbotDialog.classList.toggle("show");
+      });
+
+      function getCookieFromLocalStorage() {
+        const cookieName = "querry_cookie";
+        const cookies = document.cookie.split("; ");
+        for (let cookie of cookies) {
+          const [name, value] = cookie.split("=");
+          if (name === cookieName) {
+            return decodeURIComponent(value);
+          }
+        }
+        return null;
+      }
+
+      // --- Save cookie to browser ---
+      function saveCookieToLocalStorage(
+        cookieName = "querry_cookie",
+        cookieValue,
+        maxAge = 3600
+      ) {
+        const expires = new Date(Date.now() + maxAge * 1000).toUTCString();
+        document.cookie = `${cookieName}=${encodeURIComponent(
+          cookieValue
+        )}; expires=${expires}; path=/`;
+      }
+
+      // --- Call backend ---
+      async function askYCTBot(userMessage) {
+        let cookieData = getCookieFromLocalStorage();
+        if (!cookieData) {
+          cookieData = [];
+        } else {
+          cookieData = JSON.parse(cookieData);
+        }
+
+        // Push the latest user message
+        cookieData.push({ user: userMessage });
+
+        try {
+          const cookieParam = encodeURIComponent(JSON.stringify(cookieData));
+
+          const response = await fetch(
+            `http://127.0.0.1:4000/ask?cookie=${cookieParam}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          console.log(result);
+          saveCookieToLocalStorage(
+            "querry_cookie",
+            JSON.stringify(result.cookie)
+          );
+          return result.response;
+        } catch (error) {
+          console.error("Error calling /ask:", error);
+          return "Sorry, there was a problem connecting to the server.";
+        }
+      }
+
+      // --- Send a message ---
+      async function sendMessage() {
+        const messageText = userInput.value.trim();
+        if (messageText === "") return;
+
+        // Show user message
+        const userMessageDiv = document.createElement("div");
+        userMessageDiv.classList.add("chat-message", "user-message");
+        userMessageDiv.textContent = messageText;
+        chatbotBody.appendChild(userMessageDiv);
+        chatbotBody.scrollTop = chatbotBody.scrollHeight;
+        userInput.value = "";
+
+        // Get bot reply from backend
+        const botReply = await askYCTBot(messageText);
+
+        // Show bot reply
+        const botMessageDiv = document.createElement("div");
+        botMessageDiv.classList.add("chat-message", "bot-message");
+        console.log("Bot reply:", botReply);
+        botMessageDiv.textContent = botReply;        
+        chatbotBody.appendChild(botMessageDiv);
+        chatbotBody.scrollTop = chatbotBody.scrollHeight;
+      }
+
+      sendMessageBtn.addEventListener("click", sendMessage);
+      userInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      });
+    </script>
+  </body>
+</html>
